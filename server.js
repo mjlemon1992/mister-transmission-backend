@@ -100,7 +100,6 @@ app.post("/checkin", function(req, res) {
   }
   var customerPayload = {
     customerType: "Customer",
-    size: 0,
     firstName: b.firstName,
     lastName: b.lastName,
     email: b.email,
@@ -119,7 +118,8 @@ app.post("/checkin", function(req, res) {
       customerId: customerId,
       year: Number(b.year),
       make: b.make,
-      model: b.model
+      model: b.model,
+      size: "LightDuty"
     };
     return smPost("/vehicle", vehiclePayload)
     .then(function(vd) {
