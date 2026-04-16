@@ -99,7 +99,6 @@ app.post("/checkin", function(req, res) {
     return res.status(400).json({ error: "Missing required fields" });
   }
   var customerPayload = {
-    customerType: "individual",
     firstName: b.firstName,
     lastName: b.lastName,
     email: b.email,
