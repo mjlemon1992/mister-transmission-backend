@@ -26,9 +26,7 @@ function smPost(path, body) {
     };
     var req = https.request(options, function(res) {
       var chunks = [];
-      res.on("data", function(c) {
-        chunks.push(c);
-      });
+      res.on("data", function(c) { chunks.push(c); });
       res.on("end", function() {
         try {
           var json = JSON.parse(Buffer.concat(chunks).toString());
@@ -37,9 +35,7 @@ function smPost(path, body) {
           } else {
             resolve(json);
           }
-        } catch(e) {
-          reject(e);
-        }
+        } catch(e) { reject(e); }
       });
     });
     req.on("error", reject);
@@ -50,55 +46,73 @@ function smPost(path, body) {
 
 app.post("/checkin", function(req, res) {
   var b = req.body;
-  var missing = !b.firstName || !b.lastName || !b.phone;
-  missing = missing || !b.email || !b.year || !b.make || !b.model;
-  if (missing) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-  var customerPayload = {
+  var isFleet = b.customerType === "fleet";
+
+  var customerPayload = isFleet ? {
+    customerType: "Fleet",
+    companyName: b.companyName,
+    firstName: b.firstName,
+    lastName: b.lastName,
+    address1: b.address,
+    city: b.city,
+    postalCode: b.postcode,
+    referralSource: b.source || "other"
+  } : {
     customerType: "Customer",
     firstName: b.firstName,
     lastName: b.lastName,
-    email: b.email,
-    phone: b.phone,
-    address: {
-      street: b.address,
-      city: b.city,
-      postalCode: b.postcode
-    },
+    address1: b.address,
+    city: b.city,
+    postalCode: b.postcode,
     referralSource: b.source || "other"
   };
+
+  var customerId;
+  var vehicleId;
+  var orderId;
+
   smPost("/customer", customerPayload)
   .then(function(cd) {
-    var customerId = cd.data && cd.data.id;
-    var vehiclePayload = {
+    customerId = cd.data && cd.data.id;
+    return smPost("/customer/" + customerId + "/email", {
+      email: b.email,
+      primary: true
+    });
+  })
+  .then(function() {
+    return smPost("/customer/" + customerId + "/phone", {
+      number: b.phone,
+      primary: true
+    });
+  })
+  .then(function() {
+    return smPost("/vehicle", {
       customerId: customerId,
       year: Number(b.year),
       make: b.make,
       model: b.model,
-      size: "LightDuty"
-    };
-    return smPost("/vehicle", vehiclePayload)
-    .then(function(vd) {
-      var vehicleId = vd.data && vd.data.id;
-      var orderName = b.year + " " + b.make + " " + b.model;
-      orderName += " - " + b.firstName + " " + b.lastName;
-      var orderPayload = {
-        customerId: customerId,
-        vehicleId: vehicleId,
-        name: orderName,
-        statusLabel: "Estimate"
-      };
-      return smPost("/order", orderPayload)
-      .then(function(od) {
-        var orderId = od.data && od.data.id;
-        res.json({
-          success: true,
-          customerId: customerId,
-          vehicleId: vehicleId,
-          orderId: orderId
-        });
-      });
+      size: b.vsize || "LightDuty",
+      color: b.color || "Other"
+    });
+  })
+  .then(function(vd) {
+    vehicleId = vd.data && vd.data.id;
+    var orderName = b.year + " " + b.make + " " + b.model;
+    orderName += " - " + (isFleet ? b.companyName : b.firstName + " " + b.lastName);
+    return smPost("/order", {
+      customerId: customerId,
+      vehicleId: vehicleId,
+      name: orderName,
+      statusLabel: "Estimate"
+    });
+  })
+  .then(function(od) {
+    orderId = od.data && od.data.id;
+    res.json({
+      success: true,
+      customerId: customerId,
+      vehicleId: vehicleId,
+      orderId: orderId
     });
   })
   .catch(function(err) {
