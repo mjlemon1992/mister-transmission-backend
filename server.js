@@ -4,7 +4,7 @@ var https = require("https");
 var nodemailer = require("nodemailer");
 
 var app = express();
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 var SM_API_KEY = process.env.SM_API_KEY || "";
