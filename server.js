@@ -100,7 +100,7 @@ app.post("/checkin", function(req, res) {
   }
   var customerPayload = {
         customerType: "Customer",
-    size: "",
+    size: 1,
     firstName: b.firstName,
     lastName: b.lastName,
     email: b.email,
