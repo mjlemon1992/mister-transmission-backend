@@ -98,8 +98,8 @@ app.post("/checkin", function(req, res) {
   if (missing) {
     return res.status(400).json({ error: "Missing required fields" });
   }
-  var customerPayload = {
-    customerType: "Person",
+    var customerPayload = {
+    customerType: "individual",
     firstName: b.firstName,
     lastName: b.lastName,
     email: b.email,
@@ -109,6 +109,9 @@ app.post("/checkin", function(req, res) {
       city: b.city,
       postalCode: b.postcode
     },
+    referralSource: b.source || "other"
+  };
+
     referralSource: b.source || "other"
   };
   smPost("/customer", customerPayload)
