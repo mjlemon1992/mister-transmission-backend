@@ -7,7 +7,7 @@ var app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-var SM_API_KEY = process.env.SM_API_KEY || "";
+var SM_API_KEY = (process.env.SM_API_KEY || "").trim();
 var SM_BASE = "api.shopmonkey.cloud";
 var NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || "";
 var SMTP_HOST = process.env.SMTP_HOST || "";
