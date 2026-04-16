@@ -80,7 +80,8 @@ app.post("/checkin", function(req, res) {
     });
   })
   .then(function() {
-    return smPost("/customer/" + customerId + "/phone", {
+    return smPost("/phone", {
+      customerId: customerId,
       number: b.phone,
       primary: true
     });
