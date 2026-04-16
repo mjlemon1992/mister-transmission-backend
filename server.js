@@ -115,11 +115,7 @@ app.post("/checkin", function(req, res) {
   smPost("/customer", customerPayload)
   .then(function(cd) {
     var customerId = cd.data && cd.data.id;
-    var vehiclePayload = {
-      customerId: customerId,
-      year: Number(b.year),
-      make: b.make,
-      model: b.model
+    
     };
     return smPost("/vehicle", vehiclePayload)
     .then(function(vd) {
@@ -127,6 +123,14 @@ app.post("/checkin", function(req, res) {
       var orderName = b.year + " " + b.make + " " + b.model;
       orderName += " - " + b.firstName + " " + b.lastName;
       var orderPayload = {
+      var vehiclePayload = {
+      customerId: customerId,
+      year: Number(b.year),
+      make: b.make,
+      model: b.model,
+      size: "Standard"
+    };
+
         customerId: customerId,
         vehicleId: vehicleId,
         name: orderName,
