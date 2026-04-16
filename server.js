@@ -56,7 +56,9 @@ app.post("/checkin", function(req, res) {
     address1: b.address,
     city: b.city,
     postalCode: b.postcode,
-    referralSource: b.source || "other"
+    referralSource: b.source || "other",
+    emails: [{ email: b.email, primary: true }],
+    phoneNumbers: [{ number: b.phone, primary: true }]
   } : {
     customerType: "Customer",
     firstName: b.firstName,
@@ -64,7 +66,9 @@ app.post("/checkin", function(req, res) {
     address1: b.address,
     city: b.city,
     postalCode: b.postcode,
-    referralSource: b.source || "other"
+    referralSource: b.source || "other",
+    emails: [{ email: b.email, primary: true }],
+    phoneNumbers: [{ number: b.phone, primary: true }]
   };
 
   var customerId;
@@ -74,19 +78,6 @@ app.post("/checkin", function(req, res) {
   smPost("/customer", customerPayload)
   .then(function(cd) {
     customerId = cd.data && cd.data.id;
-    return smPost("/customer/" + customerId + "/email", {
-      email: b.email,
-      primary: true
-    });
-  })
-  .then(function() {
-    return smPost("/phone", {
-      customerId: customerId,
-      number: b.phone,
-      primary: true
-    });
-  })
-  .then(function() {
     return smPost("/vehicle", {
       customerId: customerId,
       year: Number(b.year),
